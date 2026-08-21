@@ -61,6 +61,7 @@ In `docs/workflow/documentation/`, fill each stub from your inventory. Resolve e
 | `reference/ARCHITECTURE.md` | Components, data flow, key files, patterns |
 | `reference/CONFIGURATION.md` | Every env var / config key you can find: default, meaning |
 | `reference/SECURITY.md` | Brief posture assessment: secrets handling, auth, attack surface |
+| `reference/VERSIONING.md` | Ships already written — set `{{PROJECT_NAME}}`, act on the pre-1.0 `SETUP` comment, and check the "Where the version is written" table matches what you configure in Step 4 |
 | `reference/BUGS.md` | Leave the empty table; add rows only for bugs you actually found |
 | `guides/TESTING.md` | How to run tests, test structure, how to write new ones |
 | `guides/FEATURE_CHECKLIST.md` | Manual pre-release checks, if derivable; else `TBD` |
@@ -70,7 +71,7 @@ Where something is truly unknowable from the repo, write `TBD — fill in when k
 
 ### Step 4 — Set up versioning
 
-`bump-version.ps1` ships with this template and is driven entirely by `bump-version.config.json`. Fill that config from your Step 1 inventory:
+`bump-version.ps1` ships with this template and is driven entirely by `bump-version.config.json`. The rules it enforces — what each level means, which files may be targets and which must not be — are written up in `docs/workflow/documentation/reference/VERSIONING.md`; read it before filling the config. Fill that config from your Step 1 inventory:
 
 - `versionSource` — the single file that owns the version number, plus a regex containing a `(?<ver>...)` group. The placeholder text lists examples for a csproj, a `package.json`, and a plain `VERSION` file.
 - `targets` — every other file that repeats the version, typically the doc headers already listed there. Delete rows for docs that don't carry a version; add rows for any that do.
@@ -82,7 +83,7 @@ Verify with `.\bump-version.ps1 -DryRun`: it prints the current version and each
 
 **Version impact per ticket.** Tickets carry a `Version` row (`major` / `minor` / `patch` / `none`) that `new-ticket.ps1` fills from the prefix — `F` → minor, `B`/`S` → patch, everything else → none — and `.\bump-version.ps1 -Ticket <id>` reads back at release time. Nothing to configure, but if this project's prefixes mean something different, edit `$bumpDefaults` in `new-ticket.ps1`.
 
-**If the project has no version number**, delete `bump-version.ps1` and `bump-version.config.json`, delete the version-bump step from `CLAUDE.md`'s Workflow section, and delete the `| Version |` row from `docs/workflow/backlog/_TEMPLATE.md` along with the rule describing it in `backlog/README.md` and the bump step in `docs/workflow/README.md`. `new-ticket.ps1` handles the missing row on purpose — it just stops filling it.
+**If the project has no version number**, delete `bump-version.ps1`, `bump-version.config.json`, and `docs/workflow/documentation/reference/VERSIONING.md`; delete the version-bump step from `CLAUDE.md`'s Workflow section; and delete the `| Version |` row from `docs/workflow/backlog/_TEMPLATE.md` along with the rule describing it in `backlog/README.md`, the bump step in `docs/workflow/README.md`, and the `VERSIONING.md` rows in the three documentation indexes. `new-ticket.ps1` handles the missing row on purpose — it just stops filling it.
 
 ### Step 5 — Adapt the audit schedule
 

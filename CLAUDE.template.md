@@ -45,7 +45,7 @@ Docs live under `docs/workflow/`. See `docs/workflow/README.md` for the full wor
 **Living docs** (`docs/workflow/documentation/`):
 
 - `state/` — project snapshot (start here): `CURRENT_STATE.md` (what's implemented now, known drift), `FEATURES.md` (done / planned / known issues), `ROADMAP.md` (upcoming work)
-- `reference/` — technical reference: `ARCHITECTURE.md`, `CONFIGURATION.md` (all env vars and config keys), `SECURITY.md`, `BUGS.md`
+- `reference/` — technical reference: `ARCHITECTURE.md`, `CONFIGURATION.md` (all env vars and config keys), `SECURITY.md`, `VERSIONING.md` (what major/minor/patch mean here, and every file the version is written to), `BUGS.md`
 - `runbooks/` — operations: `RUNBOOK.md`, deployment docs
 - `guides/` — how-to: `TESTING.md`, `FEATURE_CHECKLIST.md` (manual testing checklist)
 - `features/` — per-feature changelog (done work only)

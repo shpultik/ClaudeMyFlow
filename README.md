@@ -49,7 +49,7 @@ Tickets describe *changes*; the docs under `docs/workflow/documentation/` descri
 | Folder | Contents |
 |---|---|
 | `state/` | `CURRENT_STATE.md` (read first, every session), `FEATURES.md`, `ROADMAP.md` |
-| `reference/` | `ARCHITECTURE.md`, `CONFIGURATION.md`, `SECURITY.md`, `BUGS.md` |
+| `reference/` | `ARCHITECTURE.md`, `CONFIGURATION.md`, `SECURITY.md`, `VERSIONING.md`, `BUGS.md` |
 | `guides/` | `TESTING.md`, `FEATURE_CHECKLIST.md` |
 | `runbooks/` | `RUNBOOK.md` — deploy and ops procedures |
 | `features/` | Per-feature changelog, appended when a ticket closes |

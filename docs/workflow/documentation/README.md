@@ -7,7 +7,7 @@ Living project docs for {{PROJECT_NAME}}. Organized into subfolders by type.
 | Folder | Contents |
 |--------|----------|
 | [`state/`](state/) | Project snapshot: current implementation, feature list, roadmap |
-| [`reference/`](reference/) | Technical reference: architecture, config, security, known bugs |
+| [`reference/`](reference/) | Technical reference: architecture, config, security, versioning, known bugs |
 | [`runbooks/`](runbooks/) | Operations: deployment, CI/CD, monitoring, runbooks |
 | [`guides/`](guides/) | How-to guides: testing, manual checklist |
 | [`features/`](features/) | Per-feature changelog — done work, bug fixes, ticket links |
@@ -21,6 +21,7 @@ Living project docs for {{PROJECT_NAME}}. Organized into subfolders by type.
 | Full feature list | [state/FEATURES.md](state/FEATURES.md) |
 | What's next | [state/ROADMAP.md](state/ROADMAP.md) |
 | System architecture | [reference/ARCHITECTURE.md](reference/ARCHITECTURE.md) |
+| What major/minor/patch mean | [reference/VERSIONING.md](reference/VERSIONING.md) |
 | Known bugs | [reference/BUGS.md](reference/BUGS.md) |
 | Operations runbook | [runbooks/RUNBOOK.md](runbooks/RUNBOOK.md) |
 | How to run tests | [guides/TESTING.md](guides/TESTING.md) |

@@ -43,6 +43,7 @@ See `documentation/README.md` for the full index.
 | `documentation/reference/ARCHITECTURE.md` | System architecture, topology, data flow |
 | `documentation/reference/CONFIGURATION.md` | All env vars and config keys |
 | `documentation/reference/SECURITY.md` | Security posture, gaps, guidance |
+| `documentation/reference/VERSIONING.md` | What major/minor/patch mean here, and every file the version is written to |
 | `documentation/reference/BUGS.md` | Known bugs and investigations |
 | `documentation/runbooks/RUNBOOK.md` | Operations: restarts, log checks, backups |
 | `documentation/guides/TESTING.md` | How to run, build, test, code patterns |
