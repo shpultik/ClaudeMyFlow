@@ -1,0 +1,22 @@
+{
+  "_readme": [
+    "Configured by SETUP.md ('Set up versioning'). Used by bump-version.ps1.",
+    "Patterns are .NET regexes; each MUST contain a (?<ver>...) named group ((?<num>...) for buildNumber) and MUST match its file exactly once — the script aborts otherwise (drift protection).",
+    "Paths are relative to this file (repo root).",
+    "Doc 'Updated:' dates are NOT touched by the script — keeping those current is part of normal doc upkeep."
+  ],
+  "versionSource": {
+    "file": "{{VERSION_SOURCE_FILE — e.g. src/App/App.csproj, package.json, or a root VERSION file}}",
+    "pattern": "{{VERSION_SOURCE_PATTERN — e.g. <Version>(?<ver>\\d+\\.\\d+\\.\\d+)</Version> or \"version\": \"(?<ver>\\d+\\.\\d+\\.\\d+)\" or ^(?<ver>\\d+\\.\\d+\\.\\d+)$}}"
+  },
+  "targets": [
+    { "file": "docs/workflow/documentation/state/CURRENT_STATE.md",      "pattern": "> Version: (?<ver>\\d+\\.\\d+\\.\\d+)" },
+    { "file": "docs/workflow/documentation/state/FEATURES.md",           "pattern": "> Version: (?<ver>\\d+\\.\\d+\\.\\d+)" },
+    { "file": "docs/workflow/documentation/reference/ARCHITECTURE.md",   "pattern": "> Version: (?<ver>\\d+\\.\\d+\\.\\d+)" }
+  ],
+  "buildNumber": null,
+  "_buildNumberExample": {
+    "file": "src/App/App.csproj",
+    "pattern": "<ApplicationVersion>(?<num>\\d+)</ApplicationVersion>"
+  }
+}
