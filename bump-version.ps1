@@ -13,6 +13,11 @@
 
   Scheme x.y.z: z = patch/fix, y = minor feature, x = major milestone.
 
+  -Ticket takes the level from the board instead: every ticket carries a
+  "Version" metadata row (major/minor/patch/none) filled in when it was filed,
+  so the decision is made once, with the change fresh, rather than re-argued at
+  release time from a diff. A ticket marked 'none' writes nothing and says so.
+
   NOTE: keep this file ASCII-only. Windows PowerShell 5.1 reads BOM-less
   scripts as ANSI and chokes on multi-byte characters.
 
@@ -22,12 +27,22 @@
   .\bump-version.ps1 -Major     # 1.2.3 -> 2.0.0
   .\bump-version.ps1 1.4.0      # explicit version
   .\bump-version.ps1 -DryRun    # preview without writing
+
+.EXAMPLE
+  .\bump-version.ps1 -Ticket F12
+  Bumps by whatever F12's "Version" row says. Accepts a path too, for a ticket
+  that lives outside the board folders.
 #>
 param(
     [Parameter(Position = 0)]
     [string]$NewVersion,
     [switch]$Minor,
     [switch]$Major,
+
+    # Board ticket id ("F12") or path to a ticket file. Its "Version" metadata
+    # row decides the bump level.
+    [string]$Ticket,
+
     [switch]$DryRun
 )
 
@@ -75,6 +90,42 @@ function Update-SingleMatch {
     [System.IO.File]::WriteAllText($Path, $newText, (New-Object System.Text.UTF8Encoding($false)))
 }
 
+# --- Ticket lookup --------------------------------------------------------------
+function Resolve-TicketPath {
+    param([string]$Id)
+    if (Test-Path -LiteralPath $Id -PathType Leaf) { return (Resolve-Path -LiteralPath $Id).Path }
+
+    $board = Join-Path $root 'docs\workflow'
+    $hits  = @()
+    foreach ($f in @('inbox', 'backlog', 'done', 'maybeLater')) {
+        $dir = Join-Path $board $f
+        if (-not (Test-Path $dir)) { continue }
+        $hits += Get-ChildItem $dir -Filter "$Id-*.md" -File -ErrorAction SilentlyContinue
+    }
+    if ($hits.Count -eq 0) {
+        throw "Ticket '$Id' not found in docs/workflow/{inbox,backlog,done,maybeLater} and is not a path to an existing file."
+    }
+    if ($hits.Count -gt 1) {
+        $where = ($hits | ForEach-Object { $_.FullName }) -join ', '
+        throw "Ticket '$Id' is ambiguous - $($hits.Count) files match: $where. Pass a path instead."
+    }
+    return $hits[0].FullName
+}
+
+function Get-TicketBumpLevel {
+    param([string]$Path)
+    $text = [System.IO.File]::ReadAllText($Path)
+    $hits = [regex]::Matches($text, '(?m)^\|\s*Version\s*\|(?<lvl>[^|]*)\|[ \t]*$')
+    if ($hits.Count -ne 1) {
+        throw "Expected exactly 1 'Version' metadata row in '$Path', found $($hits.Count). Add one (major/minor/patch/none), or pass -Minor/-Major instead."
+    }
+    $lvl = $hits[0].Groups['lvl'].Value.Trim().Trim('`').Trim().ToLowerInvariant()
+    if ($lvl -notin @('major', 'minor', 'patch', 'none')) {
+        throw "Ticket '$Path' says Version = '$lvl'; expected one of major, minor, patch, none. A ticket still listing all four has not had the call made yet - decide it in the ticket, then rerun."
+    }
+    return $lvl
+}
+
 # --- Current version ----------------------------------------------------------
 $srcRel  = $config.versionSource.file
 $srcPath = Join-Path $root $srcRel
@@ -83,6 +134,28 @@ if ($current -notmatch '^(\d+)\.(\d+)\.(\d+)$') {
     throw "Current version '$current' in $srcRel is not in x.y.z form."
 }
 $x = [int]$Matches[1]; $y = [int]$Matches[2]; $z = [int]$Matches[3]
+
+# --- Bump level from a ticket ---------------------------------------------------
+$source = ''
+if ($Ticket) {
+    if ($NewVersion -or $Minor -or $Major) {
+        throw 'Pass either -Ticket or an explicit version / -Minor / -Major, not both.'
+    }
+    $ticketPath = Resolve-TicketPath $Ticket
+    $ticketRel  = $ticketPath
+    if ($ticketRel.StartsWith($root, [StringComparison]::OrdinalIgnoreCase)) {
+        $ticketRel = $ticketRel.Substring($root.Length + 1).Replace('\', '/')
+    }
+
+    $level = Get-TicketBumpLevel $ticketPath
+    if ($level -eq 'none') {
+        Write-Host "$ticketRel is marked Version: none - no version change. Nothing written."
+        return
+    }
+    if ($level -eq 'major') { $Major = $true }
+    if ($level -eq 'minor') { $Minor = $true }
+    $source = "  ($level, per $ticketRel)"
+}
 
 # --- Compute new version --------------------------------------------------------
 if ($NewVersion) {
@@ -120,7 +193,7 @@ if ($config.PSObject.Properties['buildNumber'] -and $null -ne $config.buildNumbe
 # --- Apply ----------------------------------------------------------------------
 $mode = ''
 if ($DryRun) { $mode = '  (dry run - no files written)' }
-Write-Host "Version: $current -> $new$mode"
+Write-Host "Version: $current -> $new$source$mode"
 foreach ($step in $plan) {
     Write-Host ("  {0}  {1} -> {2}" -f $step.File, $step.Old, $step.New)
     if (-not $DryRun) {

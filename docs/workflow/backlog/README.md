@@ -26,4 +26,5 @@ Queued tickets for {{PROJECT_NAME}} that are real but not yet in active executio
 2. Each file follows the template in [_TEMPLATE.md](_TEMPLATE.md) (metadata → problem → required changes → acceptance criteria → notes → design → open questions → phasing → out of scope).
 3. Don't repeat what's in `../documentation/reference/ARCHITECTURE.md` — link to it instead.
 4. Keep "Open questions" honest. If you don't know, write it down so future-you can decide.
-5. This README is the board index. Every ticket move (created / to inbox / to done / rejected) includes updating the tables above.
+5. Set the `Version` row honestly — it is the release decision, made once, while the change is fresh: `major` breaks existing callers or data, `minor` adds surface users can see, `patch` fixes behaviour without adding surface, `none` ships nothing observable (tests, refactors, analysis). `.\bump-version.ps1 -Ticket <id>` takes it at its word.
+6. This README is the board index. Every ticket move (created / to inbox / to done / rejected) includes updating the tables above.

@@ -67,7 +67,8 @@ The ticket board lives at `docs/workflow/`. At the start of each session:
 **Creating new tickets:** run `.\new-ticket.ps1 <Prefix> "<title>"` (repo root) — it picks the next free number, generates the file from `docs/workflow/backlog/_TEMPLATE.md`, and prints the path. Then fill in the sections.
 Prefix guide: `F` Feature · `B` Bug · `S` Security · `T` Test · `R` Refactor · `A` Analysis · `D` Draft (human stub awaiting agent expansion). Numbers are sequential within each prefix.
 **Don't scan the board to find the next number by hand.** Listing every ticket to recover one integer costs ~50× what the script does, and it races: two agents that scan seconds apart pick the same number. The script claims the number atomically, so parallel runs can't collide. For the same reason, don't add a file that stores the last-used number — it drifts from the filenames, which are the real source of truth.
-Options: `-Dest inbox` to start in the inbox, `-Scope`/`-Severity`/`-Assignee` to prefill the metadata table, `-DryRun` to preview the path. Anything requiring credentials, production access, or secrets → `-Assignee Human`.
+Options: `-Dest inbox` to start in the inbox, `-Scope`/`-Severity`/`-Assignee`/`-Bump` to prefill the metadata table, `-DryRun` to preview the path. Anything requiring credentials, production access, or secrets → `-Assignee Human`.
+**Version impact:** every ticket's `Version` row records how shipping it moves the version — `major` / `minor` / `patch` / `none`. The script fills it from the prefix (`F` → minor, `B`/`S` → patch, the rest → none); override with `-Bump` when that's wrong, e.g. a refactor that breaks callers is `-Bump major`. Decide it while the change is fresh — `.\bump-version.ps1 -Ticket <id>` reads the row back at release time so nobody re-derives the level from a diff.
 Design sections are kept for `F` tickets and dropped for the rest, per the note in `_TEMPLATE.md`. `-Scope` is left for you to fill when omitted.
 
 ## Workflow (CRITICAL)
@@ -78,7 +79,7 @@ After ANY code change:
 2. Run tests → fix failures
 3. **Never stop while build or tests are failing**
 4. Update relevant `docs/workflow/documentation/` files if behaviour changed
-5. **After adding a feature:** bump the version with `.\bump-version.ps1` (repo root) — one command updates the version source and every doc header listed in `bump-version.config.json`. No args = patch bump; `-Minor` / `-Major` for larger steps; an explicit `x.y.z` to set one; `-DryRun` to preview. **Never edit version fields by hand** — the script aborts loudly when a pattern no longer matches exactly once, and that abort is the only thing that catches drift early.
+5. **After adding a feature:** bump the version with `.\bump-version.ps1` (repo root) — one command updates the version source and every doc header listed in `bump-version.config.json`. Working from a ticket, use `.\bump-version.ps1 -Ticket <id>`: it bumps by that ticket's `Version` row, and does nothing if the row says `none`. Otherwise: no args = patch bump; `-Minor` / `-Major` for larger steps; an explicit `x.y.z` to set one; `-DryRun` to preview. **Never edit version fields by hand** — the script aborts loudly when a pattern no longer matches exactly once, and that abort is the only thing that catches drift early.
 
 <!-- SETUP: The step above assumes the shipped bump-version.ps1, configured in SETUP.md Step 4. If this project versions some other way, replace the step with the real procedure. If it doesn't version at all, delete the step entirely — and delete bump-version.ps1 and bump-version.config.json from the repo. -->
 

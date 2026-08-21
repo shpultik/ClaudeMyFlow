@@ -17,7 +17,8 @@ Create every board ticket with `.\new-ticket.ps1 <Prefix> "<title>"` (repo root)
 
 **How to apply:**
 - `.\new-ticket.ps1 B "trip stops recording after a restart"` → prints `docs/workflow/backlog/B12-trip-stops-recording-after-a-restart.md`
-- `-Dest inbox` to start in the inbox · `-Scope` / `-Severity` / `-Assignee` to prefill the metadata table · `-DryRun` to preview
+- `-Dest inbox` to start in the inbox · `-Scope` / `-Severity` / `-Assignee` / `-Bump` to prefill the metadata table · `-DryRun` to preview
+- The `Version` row (`major`/`minor`/`patch`/`none`) is the release decision, taken while the change is fresh; the script guesses from the prefix (`F` minor, `B`/`S` patch, rest none) and `-Bump` overrides it. `.\bump-version.ps1 -Ticket <id>` reads it back later ([[version-bump-end-of-work]])
 - Anything needing credentials, production access, or secrets → `-Assignee Human` ([[no-credentials-in-repo]])
 - Then fill in Problem, Required Changes, and Acceptance Criteria, and add the row to `backlog/README.md` ([[backlog-readme-update]])
 - If the script aborts complaining about `_TEMPLATE.md`, the template's header or metadata rows were edited — fix the script to match rather than bypassing it by hand

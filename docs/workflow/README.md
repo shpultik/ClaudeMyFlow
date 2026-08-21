@@ -18,7 +18,8 @@ AI-first ticket board and living documentation for {{PROJECT_NAME}}.
 2. Move the next task into `inbox/` when it is ready for active execution.
 3. Implement the changes in the codebase.
 4. Record verification notes in the ticket file under `## Notes`.
-5. Move the ticket file to `done/` only after the change is verified **and committed**, and update `backlog/README.md`.
+5. If the project versions, bump it before committing: `.\bump-version.ps1 -Ticket {ID}` uses the level recorded in the ticket's `Version` row.
+6. Move the ticket file to `done/` only after the change is verified **and committed**, and update `backlog/README.md`.
 
 The agent responsible for the project creates, updates, and moves tickets.
 The human uses the board to stay oriented and redirect work when needed.

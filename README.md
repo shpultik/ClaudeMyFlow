@@ -23,8 +23,9 @@ After setup, work moves in one direction:
 backlog/  →  inbox/  →  done/
 ```
 
-- **File** a ticket: `.\new-ticket.ps1 B "invite link does not open the app"`
+- **File** a ticket: `.\new-ticket.ps1 B "invite link does not open the app"` — it also records how shipping the ticket moves the version (`major` / `minor` / `patch` / `none`), guessed from the prefix and overridable with `-Bump`.
 - **Pick** — the agent moves the next ticket from `backlog/` to `inbox/` and works it, one at a time.
+- **Bump** — `.\bump-version.ps1 -Ticket B12` applies the level that ticket recorded, across the version source and every doc header that repeats it.
 - **Close** — the ticket moves to `done/` only after the change is verified *and committed*, and `backlog/README.md` is updated.
 - **Record** — living docs under `docs/workflow/documentation/` are updated in the same session, so the next session starts from an accurate `CURRENT_STATE.md`.
 - **Audit** — once a month or quarter, say "run the monthly audits". Prompts live in `docs/workflow/schedule/`, results land in `docs/workflow/auditResults/`, and every finding becomes a backlog ticket.
@@ -68,6 +69,8 @@ Both scripts replace something an agent would otherwise do by hand, badly:
 **`new-ticket.ps1`** — filenames are the source of truth for ticket numbers; there is no counter file to drift. Scanning a real 182-ticket board by hand to find the next number costs roughly 4,600 tokens and races: two agents that scan seconds apart pick the same number. The script costs about 90 tokens and claims the number atomically, so parallel agents can't collide.
 
 **`bump-version.ps1`** — every version pattern must match its file exactly once. If one matches zero times or several, the script aborts *before writing anything*. That abort is the point: it's what catches a version number that has quietly drifted out of a doc header.
+
+It also reads the level off the board. "Was that a feature or a fix?" is easy to answer while writing the ticket and much harder at release time, from a diff, weeks later — so the answer is recorded once, in the ticket's `Version` row, and `-Ticket <id>` applies it. A ticket marked `none` writes nothing and says so.
 
 ## Working rules
 

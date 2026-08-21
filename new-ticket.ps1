@@ -39,6 +39,10 @@
     Feature ticket -- keeps the Design / Open questions / Phasing sections.
 
 .EXAMPLE
+    .\new-ticket.ps1 R "drop the v1 sync endpoint" -Bump major
+    Overrides the prefix default (R = none) -- this refactor breaks callers.
+
+.EXAMPLE
     .\new-ticket.ps1 S "rotate API tokens" -Assignee Human -Dest inbox
 
 .EXAMPLE
@@ -65,6 +69,14 @@ param(
     [ValidateSet('HIGH', 'MEDIUM', 'LOW')]
     [string]$Severity = 'MEDIUM',
 
+    # How shipping this ticket moves the version, recorded in the ticket's
+    # "Version" row and read back later by "bump-version.ps1 -Ticket <id>".
+    # Defaults by prefix (see $bumpDefaults below); override when the default is
+    # wrong -- a breaking refactor is 'major', a fix with no user-visible change
+    # is 'none'.
+    [ValidateSet('major', 'minor', 'patch', 'none')]
+    [string]$Bump = '',
+
     # Human for anything needing credentials, production access, or secrets.
     [string]$Assignee = 'Claude',
 
@@ -76,6 +88,14 @@ $root     = $PSScriptRoot
 $board    = Join-Path $root 'docs\workflow'
 $template = Join-Path $board 'backlog\_TEMPLATE.md'
 $em       = [char]0x2014  # em-dash for the H1; kept out of source so file encoding can't corrupt it
+
+# Version impact per ticket type: features move the minor, fixes the patch,
+# and analysis/drafts/refactors/tests ship nothing a user can see. A default
+# that is wrong for a given ticket is meant to be overridden with -Bump, or
+# edited in the file afterwards -- it is a starting guess, not a verdict.
+$bumpDefaults = @{ A = 'none'; B = 'patch'; D = 'none'; F = 'minor'; R = 'none'; S = 'patch'; T = 'none' }
+$bumpExplicit = $PSBoundParameters.ContainsKey('Bump')
+if (-not $bumpExplicit) { $Bump = $bumpDefaults[$Prefix] }
 
 # Scanned for existing numbers. Absent folders are skipped, so a project
 # without maybeLater/ needs no edit here.
@@ -119,10 +139,19 @@ function Test-NumberTaken([string]$P, [int]$N) {
     return $false
 }
 
-# --- rewrite one metadata row, matched on its field name so the project's own
-# --- Scope values (set during SETUP) don't have to be known here
+# --- metadata rows are matched on their field name, so the project's own Scope
+# --- values (set during SETUP) don't have to be known here
+function Get-MetaRowPattern([string]$Field) {
+    return '(?m)^\|\s*' + [regex]::Escape($Field) + '\s*\|.*\|[ \t]*$'
+}
+
+function Test-MetaRow([string]$Text, [string]$Field) {
+    return [regex]::Matches($Text, (Get-MetaRowPattern $Field)).Count -gt 0
+}
+
+# --- rewrite one row; a field that isn't there exactly once is drift, not a typo
 function Set-MetaRow([string]$Text, [string]$Field, [string]$Value) {
-    $pattern = '(?m)^\|\s*' + [regex]::Escape($Field) + '\s*\|.*\|[ \t]*$'
+    $pattern = Get-MetaRowPattern $Field
     $m = [regex]::Matches($Text, $pattern)
     if ($m.Count -ne 1) {
         throw "ABORT: expected exactly 1 '$Field' row in _TEMPLATE.md, found $($m.Count). Update new-ticket.ps1 to match the template."
@@ -162,6 +191,15 @@ function New-TicketBody([string]$Id, [string]$TitleText) {
     $text = Set-MetaRow $text 'Severity' $Severity
     if ($Scope) { $text = Set-MetaRow $text 'Scope' $Scope }   # else leave it for the author
 
+    # Projects that don't version delete this row along with bump-version.ps1
+    # (SETUP.md, 'Set up versioning'), so its absence is legal -- but asking for
+    # a -Bump the board cannot record is not.
+    if (Test-MetaRow $text 'Version') {
+        $text = Set-MetaRow $text 'Version' $Bump
+    } elseif ($bumpExplicit) {
+        throw "ABORT: -Bump was passed but _TEMPLATE.md has no 'Version' row -- this project does not track version impact."
+    }
+
     if ($text -match '\{Prefix\}|\{N\}|\{Title\}') {
         throw "ABORT: template placeholders survived substitution -- update new-ticket.ps1."
     }
@@ -195,19 +233,21 @@ for ($n = $start; $n -lt $start + 50; $n++) {
     }
 
     # Verify only AFTER the reservation is held -- see the note in .DESCRIPTION.
-    $lost = Test-NumberTaken $Prefix $n
+    $lost  = Test-NumberTaken $Prefix $n
+    $wrote = $false
     try {
         if (-not $lost) {
             $bytes = (New-Object Text.UTF8Encoding($false)).GetBytes((New-TicketBody $id $Title))
             $stream.Write($bytes, 0, $bytes.Length)
+            $wrote = $true
         }
     } finally {
         $stream.Dispose()
+        # Anything that threw above (drifted template, rejected -Bump) must give
+        # the number back rather than leave an empty reservation holding it.
+        if (-not $wrote) { Remove-Item -LiteralPath $reserved -Force -ErrorAction SilentlyContinue }
     }
-    if ($lost) {
-        Remove-Item -LiteralPath $reserved -Force -ErrorAction SilentlyContinue
-        continue
-    }
+    if ($lost) { continue }
 
     $path = Join-Path $destDir "$id-$slug.md"
     try {

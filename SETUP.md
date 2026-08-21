@@ -80,7 +80,9 @@ Every pattern must match its file **exactly once**. The script aborts before wri
 
 Verify with `.\bump-version.ps1 -DryRun`: it prints the current version and each file it would touch. The script refuses to run while any `{{placeholder}}` remains in the config.
 
-**If the project has no version number**, delete `bump-version.ps1` and `bump-version.config.json`, and delete the version-bump step from `CLAUDE.md`'s Workflow section.
+**Version impact per ticket.** Tickets carry a `Version` row (`major` / `minor` / `patch` / `none`) that `new-ticket.ps1` fills from the prefix — `F` → minor, `B`/`S` → patch, everything else → none — and `.\bump-version.ps1 -Ticket <id>` reads back at release time. Nothing to configure, but if this project's prefixes mean something different, edit `$bumpDefaults` in `new-ticket.ps1`.
+
+**If the project has no version number**, delete `bump-version.ps1` and `bump-version.config.json`, delete the version-bump step from `CLAUDE.md`'s Workflow section, and delete the `| Version |` row from `docs/workflow/backlog/_TEMPLATE.md` along with the rule describing it in `backlog/README.md` and the bump step in `docs/workflow/README.md`. `new-ticket.ps1` handles the missing row on purpose — it just stops filling it.
 
 ### Step 5 — Adapt the audit schedule
 

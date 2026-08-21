@@ -8,6 +8,7 @@
 | Assignee | `Claude` |
 | Scope    | {{SCOPE_VALUES — e.g. `APP` / `BACKEND` / `BOTH`; adjust to this project's components}} |
 | Severity | `HIGH` / `MEDIUM` / `LOW` |
+| Version  | `major` / `minor` / `patch` / `none` |
 
 ## Problem
 
