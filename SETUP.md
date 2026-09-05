@@ -5,11 +5,11 @@ A project-agnostic AI-agent workflow template: ticket board (backlog → inbox �
 ## How to use (human)
 
 1. Copy **everything in this folder except `README.md`** into the root of your solution/repo. (That README describes the template itself; your project keeps its own.)
-2. Open Claude Code (or another agent) in that solution.
+2. Open your coding agent (Claude Code or equivalent) in that solution.
 3. Say: **"Read SETUP.md and run setup."**
-4. Review the generated `CLAUDE.md` and the agent's summary; correct anything that reads wrong.
+4. Review the generated `AGENTS.md` and the agent's summary; correct anything that reads wrong.
 
-That's it. The agent fills in all project specifics by scanning your repo, then removes the template scaffolding (this file, `CLAUDE.template.md`, `memory-seed/`).
+That's it. The agent fills in all project specifics by scanning your repo, then removes the template scaffolding (this file, `AGENTS.template.md`, `memory-seed/`).
 
 After setup, the daily loop is:
 
@@ -40,14 +40,18 @@ Scan the repository and establish:
 - Client/server split (app + API backend) — or a single component
 - CI/CD (workflow files), deployment mechanism
 - Versioning scheme (where the version number lives, how it gets bumped) — or none
-- Existing docs (README, an existing CLAUDE.md, docs folders)
+- Existing docs (README, an existing `AGENTS.md` or `CLAUDE.md`, docs folders)
+- Which instructions file *your* agent reads at session start (`AGENTS.md`, `CLAUDE.md`, `.cursorrules`, `GEMINI.md`, `.windsurfrules`, …)
 
-### Step 2 — Create CLAUDE.md
+### Step 2 — Create AGENTS.md
 
-- Open `CLAUDE.template.md`. Fill every `{{PLACEHOLDER}}` from your Step 1 inventory and act on then delete every `<!-- SETUP: ... -->` comment.
+- Open `AGENTS.template.md`. Fill every `{{PLACEHOLDER}}` from your Step 1 inventory and act on then delete every `<!-- SETUP: ... -->` comment.
 - Sections that genuinely don't apply (e.g. no backend, no versioning): **delete them cleanly** rather than leaving "N/A" noise.
-- If the repo already has a `CLAUDE.md`: merge. Keep the existing file's project-specific facts (commands, gotchas, rules the user already wrote); adopt the template's **Documentation, Board Operations, Workflow, Working Rules, and Coding Rules** sections.
-- Save the result as `CLAUDE.md` in the repo root. Delete `CLAUDE.template.md`.
+- If the repo already has an `AGENTS.md` or `CLAUDE.md`: merge. Keep the existing file's project-specific facts (commands, gotchas, rules the user already wrote); adopt the template's **Documentation, Board Operations, Workflow, Working Rules, and Coding Rules** sections.
+- Save the result as `AGENTS.md` in the repo root. If the repo had a `CLAUDE.md` with real content, that content is now merged into `AGENTS.md`. Delete `AGENTS.template.md`.
+- **Entry-point shims** — so each agent picks the file up on its own:
+  - `CLAUDE.md` in the repo root: replace it (or create it) with the single line `See @AGENTS.md` — Claude Code follows the `@` import and reads the real file.
+  - If your agent reads some other file (`.cursorrules`, `GEMINI.md`, `.windsurfrules`, …), add a one-line pointer to `AGENTS.md` there too.
 
 ### Step 3 — Fill the documentation stubs
 
@@ -83,7 +87,7 @@ Verify with `.\bump-version.ps1 -DryRun`: it prints the current version and each
 
 **Version impact per ticket.** Tickets carry a `Version` row (`major` / `minor` / `patch` / `none`) that `new-ticket.ps1` fills from the prefix — `F` → minor, `B`/`S` → patch, everything else → none — and `.\bump-version.ps1 -Ticket <id>` reads back at release time. Nothing to configure, but if this project's prefixes mean something different, edit `$bumpDefaults` in `new-ticket.ps1`.
 
-**If the project has no version number**, delete `bump-version.ps1`, `bump-version.config.json`, and `docs/workflow/documentation/reference/VERSIONING.md`; delete the version-bump step from `CLAUDE.md`'s Workflow section; and delete the `| Version |` row from `docs/workflow/backlog/_TEMPLATE.md` along with the rule describing it in `backlog/README.md`, the bump step in `docs/workflow/README.md`, and the `VERSIONING.md` rows in the three documentation indexes. `new-ticket.ps1` handles the missing row on purpose — it just stops filling it.
+**If the project has no version number**, delete `bump-version.ps1`, `bump-version.config.json`, and `docs/workflow/documentation/reference/VERSIONING.md`; delete the version-bump step from `AGENTS.md`'s Workflow section; and delete the `| Version |` row from `docs/workflow/backlog/_TEMPLATE.md` along with the rule describing it in `backlog/README.md`, the bump step in `docs/workflow/README.md`, and the `VERSIONING.md` rows in the three documentation indexes. `new-ticket.ps1` handles the missing row on purpose — it just stops filling it.
 
 ### Step 5 — Adapt the audit schedule
 
@@ -99,7 +103,7 @@ If your system prompt gives you a persistent memory directory:
 2. Add one index line per copied memory to your `MEMORY.md`, per your memory system's format.
 3. `solo-dev-commit-to-master.md` encodes a solo-developer git workflow — confirm with the user that this project is also solo before seeding it; skip it for team projects.
 
-If you have no memory system, skip this — the same rules are baked into CLAUDE.md.
+If you have no memory system, skip this — the same rules are baked into AGENTS.md.
 
 **Either way, delete the `memory-seed/` folder from the repo afterwards.**
 
@@ -113,11 +117,11 @@ If you have no memory system, skip this — the same rules are baked into CLAUDE
 
 - Delete `SETUP.md`.
 - Verification checklist — all must pass:
-  - [ ] `CLAUDE.md` exists at repo root; `CLAUDE.template.md`, `SETUP.md`, and `memory-seed/` are gone
-  - [ ] Searching `CLAUDE.md`, `docs/workflow/`, **and `bump-version.config.json`** for `{{` returns **zero** hits — the config sits at the repo root, outside the folders above, so it is the one that gets missed
-  - [ ] Searching `CLAUDE.md` and `docs/workflow/` for `SETUP:` returns **zero** hits
-  - [ ] The build command written in CLAUDE.md was actually run and works
-  - [ ] The test command written in CLAUDE.md was actually run and works (or CLAUDE.md honestly says there are no tests yet)
+  - [ ] `AGENTS.md` exists at repo root and holds the real content; `CLAUDE.md` is the one-line `See @AGENTS.md` shim; `AGENTS.template.md`, `SETUP.md`, and `memory-seed/` are gone
+  - [ ] Searching `AGENTS.md`, `docs/workflow/`, **and `bump-version.config.json`** for `{{` returns **zero** hits — the config sits at the repo root, outside the folders above, so it is the one that gets missed
+  - [ ] Searching `AGENTS.md` and `docs/workflow/` for `SETUP:` returns **zero** hits
+  - [ ] The build command written in AGENTS.md was actually run and works
+  - [ ] The test command written in AGENTS.md was actually run and works (or AGENTS.md honestly says there are no tests yet)
   - [ ] `.\new-ticket.ps1 B "setup smoke test" -DryRun` prints a path (proves the script can read `_TEMPLATE.md`; it aborts loudly if the template's header or metadata rows were changed)
   - [ ] `.\bump-version.ps1 -DryRun` prints the current version and its target files — or `bump-version.ps1` and `bump-version.config.json` were deleted because the project doesn't version (Step 4)
 - Commit the workflow files (message: `chore: set up ClaudeMyFlow workflow`), following the project's git workflow. Stage only the files this setup created or edited.

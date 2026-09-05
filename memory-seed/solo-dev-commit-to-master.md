@@ -11,7 +11,7 @@ For routine work — bug fixes, small features, refactors, doc updates, operatio
 
 **How to apply:**
 - **Default:** work on the default branch, commit, push. No branch.
-- **Never** add `Co-Authored-By: Claude ...` lines to commit messages — the user explicitly doesn't want them.
+- **Never** add `Co-Authored-By` or agent-attribution lines (e.g. "Generated with …") to commit messages or PR descriptions — the user explicitly doesn't want them.
 - **Make a branch + PR only when:** the change is large (touches many subsystems, hard to review as one diff), risky/critical (could break production — non-backwards-compatible migrations, breaking API changes, auth/payment changes), or the user explicitly asks.
 - When unsure between "small enough for the default branch" and "warrants a branch", ask once. Don't reflexively branch.
 - Respect [[parallel-agents-commit-scope]] on every commit.

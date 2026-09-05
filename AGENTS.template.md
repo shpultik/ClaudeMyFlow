@@ -1,9 +1,10 @@
-<!-- SETUP: This file becomes the project's CLAUDE.md.
+<!-- SETUP: This file becomes the project's AGENTS.md.
      Fill every {{PLACEHOLDER}}, act on and remove every SETUP comment,
-     save the result as CLAUDE.md in the repo root, then delete this template.
+     save the result as AGENTS.md in the repo root, add the one-line CLAUDE.md
+     shim (SETUP.md Step 2), then delete this template.
      Full procedure: SETUP.md Step 2. -->
 
-# CLAUDE.md
+# AGENTS.md
 
 ## Project Overview
 
@@ -108,12 +109,16 @@ These apply to every session, alongside the board workflow:
 
 ## Coding Rules
 
-- **Architecture flow:** {{ARCHITECTURE_FLOW — the layering rule, e.g. "Views → ViewModels → Services → Repositories"}}
-- **No business logic in the UI layer**, no direct data access from UI
-- **Async/await properly**, keep the UI/main thread responsive
+<!-- SETUP: the first three rules are layering / concurrency conventions — rewrite
+     each from this repo's actual stack, or delete it if it doesn't apply. The rest
+     are stack-independent; keep them. -->
+
+- **Architecture flow:** {{ARCHITECTURE_FLOW — the project's layering rule and its direction, e.g. "Views → ViewModels → Services → Repositories", "handlers → domain services → data access", "components → hooks → API client". Delete if there is no consistent layering.}}
+- **Layer boundaries:** {{LAYER_BOUNDARIES — what must not cross a boundary, e.g. "no business logic or data access in the UI/presentation layer", "no framework or transport types in the domain layer". Delete if N/A.}}
+- **Concurrency:** {{CONCURRENCY — the project's model and its one rule, e.g. "async/await throughout; never block the UI thread", "goroutines + channels; no shared mutable state without a mutex", "synchronous; offload long work to a job queue". Delete if the project is trivially synchronous.}}
 - **Tests:** deterministic, no external dependencies; add tests for new logic; fix bugs with minimal changes + a regression test
 - **Naming:** follow the project's existing conventions; descriptive names
-- Minimal changes — don't rewrite unless asked; follow existing patterns, reuse existing services
+- Minimal changes — don't rewrite unless asked; follow existing patterns, reuse what's already there
 - **Surgical changes:** when editing existing code, don't improve adjacent code, comments, or formatting — touch only what the task requires. If your changes create unused imports/variables, remove them; don't remove pre-existing dead code unless asked.
 - **Goal-driven execution:** before implementing, convert the task to a verifiable criterion (e.g. "fix bug" → "write a test that reproduces it, then make it pass"). For multi-step tasks, state a brief plan with a verify step for each.
 - **Read before edit:** read any file before editing it; grep for all callers before modifying a function. Research before you edit.

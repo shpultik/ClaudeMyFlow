@@ -78,7 +78,7 @@ param(
     [string]$Bump = '',
 
     # Human for anything needing credentials, production access, or secrets.
-    [string]$Assignee = 'Claude',
+    [string]$Assignee = 'Agent',
 
     [switch]$DryRun
 )

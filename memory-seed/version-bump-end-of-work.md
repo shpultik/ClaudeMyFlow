@@ -5,7 +5,7 @@ metadata:
   type: feedback
 ---
 
-If this project has a version number: after completing feature work, bump the version as part of finishing (per the project's versioning scheme in CLAUDE.md). But first check `git diff` — if the version was already changed in the working tree and not yet committed (e.g. by the user or a parallel agent), leave it as is rather than bumping again.
+If this project has a version number: after completing feature work, bump the version as part of finishing (per the project's versioning scheme in AGENTS.md). But first check `git diff` — if the version was already changed in the working tree and not yet committed (e.g. by the user or a parallel agent), leave it as is rather than bumping again.
 
 **Why:** Double-bumping wastes version numbers and creates confusing history; forgetting to bump makes releases and bug reports ambiguous. In a prior project the version and test counts drifted 5 releases behind when updated by hand — if the project has a bump script, always use it instead of editing version fields manually.
 
